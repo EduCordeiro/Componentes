@@ -1,0 +1,32 @@
+select COD_BA, NOME_CLIENTE_BA as nome_cliente, DATA_VENCIMENTO as VENCIMENTO, LOTE_PROCESSAMENTO as LOTE, ENDERECO_EMAIL as email_destino, CODIGO_ERRO_EMAIL as codigo_do_erro, COD_OPERADORAS_FATURADORAS as CODIGO_CIDADE, Cidade FROM afp_amdocs__privia_vt_15_cl_junho_fa_julho_2015.detalhes_report
+where FORMA_ENVIO = "EMAIL" AND NOME_DO_ARQUIVO_AFP IN("dd.NET.01062015.20150630214612.outpu", "dd.NET.02062015.20150701001343.output", "dd.NET.03062015.20150701034827.output");
+
+
+select a.COD_OPERADORAS_FATURADORAS   as COD_CIDADE,
+       a.COD_BA                       as COD_CLIENTE,
+       a.data_vencimento              as DATA_VENCIMENTO,
+       a.PAGINAS                      as PAGINAS_NET,
+       a.NOME_DO_ARQUIVO_AFP          as NOME_DO_ARQUIVO,
+       b.TIPO_PAPEL                   as FORMATO,
+       a.FOLHAS                       as FOLHAS_FINGER,
+       "N"                            AS "REDIRECIOANDO",
+       a.FORMA_ENVIO                  as TIPO_IMPRESSO,
+       B.DESCRICAO_PRODUTO            AS PRODUTO,
+       LOTE_PROCESSAMENTO,
+       CODIGO_ERRO_CEDO
+FROM
+  afp_amdocs__privia_vt_15_cl_junho_fa_julho_2015.detalhes_report a,
+  afp_amdocs__privia_vt_15_cl_junho_fa_julho_2015.detalhes_nop b
+where
+
+     a.COD_BA                        = mid(b.contrato, 4, 9)
+and  a.SEQUENCIA_NO_ARQUIVO_ORIGINAL = b.SEQUENCIA_NO_ARQUIVO_ORIGINAL
+AND  A.NOME_DO_ARQUIVO_AFP           = B.ARQUIVO
+
+and a.FORMA_ENVIO <> "EMAIL"
+
+AND
+(   NOME_DO_ARQUIVO_AFP = "dd.NET.01062015.20150630214612.output"
+ or NOME_DO_ARQUIVO_AFP = "dd.NET.02062015.20150701001343.output"
+ or NOME_DO_ARQUIVO_AFP = "dd.NET.03062015.20150701034827.output")
+order by cod_ba;

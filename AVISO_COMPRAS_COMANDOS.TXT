@@ -1,0 +1,7 @@
+SELECT * FROM net_aviso_de_compra_emails.aviso_de_compra_email_archive
+where NumeroDoPedido = "1358";
+SELECT * FROM net_aviso_de_compra_emails.aviso_de_compra_email_archive_temp
+where NumeroDoPedido = "1358";
+select * FROM proj_net_delphi__aviso_de_compra.controle_recebimento_arquivos
+where pedido = "1358";
+SELECT * FROM proj_net_delphi__aviso_de_compra.lotes_pedidos l;

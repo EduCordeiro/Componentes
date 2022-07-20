@@ -1,0 +1,9 @@
+insert ignore into fac.net_encartes(
+SELECT LPAD(operadora, 3, '000'), "000000", "000000", "000000"  FROM controle_operadoras_net.tabela_operadoras_net_faturamento
+order by operadora
+);
+
+insert ignore netsat_fatura_emails.mensagens_por_operadoras(
+SELECT LPAD(operadora, 3, '000'), "1", "17", "10", "14"  FROM controle_operadoras_net.tabela_operadoras_net_faturamento
+order by operadora
+)

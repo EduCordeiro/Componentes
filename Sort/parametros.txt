@@ -1,0 +1,1 @@
+S:\ARQUIVOS_TEMPORARIOS>sort.exe -k 1.168,1.190 arquivo.txt -o arquivo.txt.class

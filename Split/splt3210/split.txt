@@ -1,0 +1,39 @@
+File Splitter for Win32 - Copyright (C) 1998, Jem E. Berkes
+http://www.pc-tools.net/	jberkes@pc-tools.net
+
+This program will split a large file into a number of smaller sections.
+You can either specify the desired size of each partition, or give the
+name of a disk drive onto which multiple partitions will be copied.
+
+---------
+Usage #1: Splitting files into exact partitions
+(Can be used to create files that can be more easily downloaded off of
+internet sites or BBSes, for example)
+
+Type: SPLIT filename size
+e.g.: SPLIT largefile.zip 1048576
+	This would create files named largefile.zip.1, largefile.zip.2,
+	and so on. Each partition will be 1048576 bytes large.
+
+---------
+Usage #2: Splitting a file onto multiple diskettes
+(Can be used to transport a very large file to another computer using
+diskettes. You only need one spare diskette to be able to do this)
+
+Type: SPLIT filename d:
+e.g.: SPLIT largefile.zip a:
+	This would create a file named largefile.zip.1 on the first
+	diskette, then prompt for as many diskettes as needed as it
+	creates consecutively numbered files that take up as much disk
+	space as possible on the target drive.
+
+---------
+JOINING THE FILES BACK TOGETHER!
+
+This can be accomplished with a very simple command:
+COPY /B part.1+part.2+part.3... /B outputfile
+
+This will perform a binary append of all parts into the output file.
+
+The following will also work in Windows NT (and perhaps Windows 95)
+COPY /B part.* /B outputfile

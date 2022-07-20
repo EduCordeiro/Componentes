@@ -1,0 +1,314 @@
+
+ XBURP01.COB                             Fri Jul 17 07:34:49 1998    Page   1
+ line number source line   Microsoft COBOL                       Version 2.10
+
+   1         IDENTIFICATION   DIVISION.
+   2         PROGRAM-ID.      XBURP01.
+   3         AUTHOR.          FINGERPRINT.
+   4        *************************************************************
+   5        *..LE ARQUIVO PEDIDO CLIENTE BASEADO NO ARQUIVO PARAMETRO
+   6        *  E GERA ARQUIVO SAIDA TAMBEM BASEADO NO PARAMETRO
+   7        *  (PRE-REQUISITO - ALIMENTAR POR EDITOR O ARQUIVO:
+   8        *   C:\BURI\PARAMET, NOMEANDO ARQUIVOS ENTRADA E SAIDA
+   9        *..REGRAVA PARAMETRO COM QTDES DOCS,REGS,GRUPO/COTA INI E FIM
+  10        *..GRAVA ARQUIVO CORREPONDENCIA SEQUENCIA DOC x GRUPO/COTA
+  11        *  ...GRUPO/COTA BASEADO NO CANAL/FONTE (A1)
+  12        *..NUMERA PEDIDO COM SEQUENCIA NA COLUNA 200+7 POSICOES
+  13        *  ...CONTADOR DE SEQUENCIA BASEADO NO CANAL/FONTE (15)
+  14        *..GERA SAIDA COM TAMANHO 207
+  15        *************************************************************
+  16         ENVIRONMENT      DIVISION.
+  17         SPECIAL-NAMES.
+  18             DECIMAL-POINT  IS COMMA.
+  19         INPUT-OUTPUT     SECTION.
+  20         FILE-CONTROL.
+  21             SELECT       PARAMET        ASSIGN   TO    DISK
+  22                          ORGANIZATION   IS       LINE  SEQUENTIAL
+  23                          ACCESS         MODE     IS    SEQUENTIAL.
+  24             SELECT       RESUMO         ASSIGN   TO    DISK
+  25                          ORGANIZATION   IS       LINE  SEQUENTIAL
+  26                          ACCESS         MODE     IS    SEQUENTIAL.
+  27             SELECT       ENTRADA        ASSIGN   TO    DISK
+  28                          ORGANIZATION   IS       LINE  SEQUENTIAL
+  29                          ACCESS         MODE     IS    SEQUENTIAL.
+  30             SELECT       SAIDA          ASSIGN   TO    DISK
+  31                          ORGANIZATION   IS       LINE  SEQUENTIAL
+  32                          ACCESS         MODE     IS    SEQUENTIAL.
+  33             SELECT       CORRESP        ASSIGN   TO    DISK
+  34                          ORGANIZATION   IS       LINE  SEQUENTIAL
+  35                          ACCESS         MODE     IS    SEQUENTIAL.
+  36    
+  37    
+  38    
+  39         DATA            DIVISION.
+  40         FILE             SECTION.
+  41         FD  PARAMET
+  42             RECORD CONTAINS 100 CHARACTERS
+  43             LABEL RECORD IS STANDARD
+  44             VALUE OF FILE-ID IS ARQP-ID.
+  45    
+  46         01  REG-PARAMET.
+  47             05 P-DADOS       PIC X(100).
+  48    
+  49         FD  RESUMO
+  50             RECORD CONTAINS 120 CHARACTERS
+  51             LABEL RECORD IS STANDARD
+  52             VALUE OF FILE-ID IS ARQR-ID.
+  53    
+  54         01  REG-RESUMO.
+  55             05 R-DADOS       PIC X(120).
+  56    
+  57         FD  ENTRADA
+
+ XBURP01.COB                             Fri Jul 17 07:34:49 1998    Page   2
+ line number source line   Microsoft COBOL                       Version 2.10
+
+  58             RECORD CONTAINS 147 CHARACTERS
+  59             LABEL RECORD IS STANDARD
+  60             VALUE OF FILE-ID IS ARQE-ID.
+  61    
+  62         01  REG-ENTRADA.
+  63             05 E-DADOS       PIC X(147).
+  64    
+  65         FD  SAIDA
+  66             RECORD CONTAINS 207 CHARACTERS
+  67             LABEL RECORD IS STANDARD
+  68             VALUE OF FILE-ID IS ARQS-ID.
+  69    
+  70         01  REG-SAIDA.
+  71             05 S-FIL         PIC X(207).
+  72    
+  73         FD  CORRESP
+  74             RECORD CONTAINS 018 CHARACTERS
+  75             LABEL RECORD IS STANDARD
+  76             VALUE OF FILE-ID IS ARQC-ID.
+  77    
+  78         01  REG-CORRES.
+  79             05 C-DADOS       PIC X(018).
+  80    
+  81    
+  82         WORKING-STORAGE SECTION.
+  83         01  aux.
+  84             05 W-TIME        PIC X(06) VALUE SPACES.
+  85             05 W-GRUCOTA     PIC X(09) VALUE SPACES.
+  86             05 W-LIDOS       PIC 9(06) VALUE ZEROS.
+  87             05 W-LIDO1       PIC 9(09) VALUE ZEROS.
+  88             05 W-LIDPARM     PIC 9(09) VALUE ZEROS.
+  89             05 W-GRAVA       PIC 9(09) VALUE ZEROS.
+  90             05 W-FIM         PIC 9(01) VALUE ZEROS.
+  91             05 W-FIMP        PIC 9(01) VALUE ZEROS.
+  92             05 W-FIMR        PIC 9(01) VALUE ZEROS.
+  93             05 W-RESTO       PIC 9(06) VALUE ZEROS.
+  94             05 W-LIM-1       PIC 9(06) VALUE ZEROS.
+  95             05 W-CONTA       pic 9(06) value zeros.
+  96             05 Y             pic 9(02) value 2.
+  97             05 YY            pic x(02) value "02".
+  98             05 ARQP-ID       pic x(27) value "\BURI\PARAMET.TXT".
+  99             05 ARQR-ID       pic x(27) value "\BURI\RESUMO.TXT".
+ 100             05 ARQE-ID.
+ 101                10 FILLER     pic x(06) value "\BURI\".
+ 102                10 AE-SUB     pic x(06) value SPACES.
+ 103                10 AE-BARRA   pic x(01) value SPACES.
+ 104                10 AE-ARQ     pic x(12) value SPACES.
+ 105             05 ARQS-ID.
+ 106                10 FILLER     pic x(06) value "\BURI\".
+ 107                10 AS-SUB     pic x(06) value SPACES.
+ 108                10 AS-BARRA   pic x(01) value SPACES.
+ 109                10 AS-ARQ     pic x(12) value SPACES.
+ 110             05 ARQC-ID.
+ 111                10 FILLER     pic x(06) value "\BURI\".
+ 112                10 AC-SUB     pic x(06) value SPACES.
+ 113                10 AC-BARRA   pic x(01) value SPACES.
+ 114                10 AC-ARQ     pic x(12) value SPACES.
+
+ XBURP01.COB                             Fri Jul 17 07:34:49 1998    Page   3
+ line number source line   Microsoft COBOL                       Version 2.10
+
+ 115             05 W-SAIDA.
+ 116                10 WS-CANAL   pic x(001) value SPACES.
+ 117                10 WS-FONTE   pic x(001) value SPACES.
+ 118                10 WS-DADOS   pic x(145) value SPACES.
+ 119                10 WS-FILLER  pic x(053) value SPACES.
+ 120                10 WS-XEROX   pic x(007) value SPACES.
+ 121             05 W-PARAMET.
+ 122                10 P-SUBDIR1     PIC X(006).
+ 123                10 P-BARRA1      PIC X(001).
+ 124                10 P-ARQENT      PIC X(012).
+ 125                10 P-SUBDIR2     PIC X(006).
+ 126                10 P-BARRA2      PIC X(001).
+ 127                10 P-ARQSAI      PIC X(012).
+ 128                10 P-SUBDIR3     PIC X(006).
+ 129                10 P-BARRA3      PIC X(001).
+ 130                10 P-ARQCOR      PIC X(012).
+ 131                10 P-FILLER      PIC X(043).
+ 132             05 W-RESUMO.
+ 133                10 R-SUBDIR1     PIC X(006).
+ 134                10 R-BARRA1      PIC X(001).
+ 135                10 R-ARQENT      PIC X(012).
+ 136                10 R-SUBDIR2     PIC X(006).
+ 137                10 R-BARRA2      PIC X(001).
+ 138                10 R-ARQSAI      PIC X(012).
+ 139                10 R-SUBDIR3     PIC X(006).
+ 140                10 R-BARRA3      PIC X(001).
+ 141                10 R-ARQCOR      PIC X(012).
+ 142                10 R-FILLER1     PIC X(001).
+ 143                10 R-CONTDOC     PIC 9(009).
+ 144                10 R-FILLER2     PIC X(001).
+ 145                10 R-CONTREG     PIC 9(009).
+ 146                10 R-FILLER3     PIC X(001).
+ 147                10 R-CONTGRA     PIC 9(009).
+ 148                10 R-GRUCOTAI    PIC X(009).
+ 149                10 R-GRUCOTAF    PIC X(009).
+ 150                10 R-FILLER      PIC X(015).
+ 151             05 W-CORRES.
+ 152                10 C-GRUCOTA  pic x(009) value SPACES.
+ 153                10 C-FILLER   pic x(002) value SPACES.
+ 154                10 C-XEROX    pic x(007) value SPACES.
+ 155             05 W-ENTRADA.
+ 156                10 E-CANAL   pic x(001) value SPACES.
+ 157                10 E-FONTE   pic x(001) value SPACES.
+ 158                10 E-DADO    pic x(145) value SPACES.
+ 159             05 W-ENTRADA-R  REDEFINES W-ENTRADA.
+ 160                10 E-FILLER  pic x(070).
+ 161                10 E-GRUCOTA pic x(011).
+ 162                10 E-FILLER1 pic x(066).
+ 163    
+ 164    
+ 165         PROCEDURE  DIVISION.
+ 166         PRINCI.
+ 167             OPEN    INPUT     PARAMET
+ 168             OPEN    OUTPUT    RESUMO.
+ 169    
+ 170             PERFORM LERPARM   THRU      SAI-LERPARM.
+ 171    
+
+ XBURP01.COB                             Fri Jul 17 07:34:49 1998    Page   4
+ line number source line   Microsoft COBOL                       Version 2.10
+
+ 172             PERFORM PROCESSA  THRU      SAI-PROCESSA
+ 173               UNTIL W-FIMP    EQUAL     1.
+ 174    
+ 175    
+ 176             CLOSE   PARAMET.
+ 177             CLOSE   RESUMO.
+ 178    
+ 179             DISPLAY (22 01) "TERMINO AS : " W-TIME.
+ 180    
+ 181    
+ 182             OPEN    INPUT     RESUMO.
+ 183    
+ 184         SAI-PRINC.
+ 185             STOP RUN.
+ 186    
+ 187         LERPARM.
+ 188             READ    PARAMET INTO W-PARAMET AT END
+ 189                    MOVE 1 TO W-FIMP
+ 190                    GO TO SAI-LERPARM.
+ 191             ADD    1  TO W-LIDPARM.
+ 192             DISPLAY (21 70) W-LIDPARM.
+ 193         SAI-LERPARM.
+ 194             EXIT.
+ 195    
+ 196         PROCESSA.
+ 197             DISPLAY (01 01) erase
+ 198             ACCEPT W-TIME FROM TIME
+ 199             DISPLAY (21 01) "INICIO AS  : " W-TIME
+ 200             MOVE P-SUBDIR1  TO     AE-SUB
+ 201             MOVE P-BARRA1   TO     AE-BARRA
+ 202             MOVE P-ARQENT   TO     AE-ARQ
+ 203             MOVE P-SUBDIR2  TO     AS-SUB
+ 204             MOVE P-BARRA2   TO     AS-BARRA
+ 205             MOVE P-ARQSAI   TO     AS-ARQ
+ 206             MOVE P-SUBDIR3  TO     AC-SUB
+ 207             MOVE P-BARRA3   TO     AC-BARRA
+ 208             MOVE P-ARQCOR   TO     AC-ARQ
+ 209             OPEN    INPUT     ENTRADA.
+ 210             OPEN    OUTPUT    SAIDA.
+ 211             OPEN    OUTPUT    CORRESP.
+ 212    
+ 213             PERFORM LER       THRU      SAI-LER.
+ 214    
+ 215             PERFORM CONTAGRA  THRU      SAI-CONTAGRA
+ 216               UNTIL W-FIM     EQUAL     1.
+ 217    
+ 218             CLOSE   ENTRADA SAIDA CORRESP.
+ 219    
+ 220             DISPLAY (22 01) "TERMINO AS : " W-TIME.
+ 221             MOVE W-LIDOS    TO  R-CONTDOC.
+ 222             MOVE W-LIDO1    TO  R-CONTREG.
+ 223             MOVE W-GRUCOTA  TO  R-GRUCOTAF.
+ 224             MOVE P-SUBDIR1  TO  R-SUBDIR1.
+ 225             MOVE P-BARRA1   TO  R-BARRA1.
+ 226             MOVE P-ARQENT   TO  R-ARQENT.
+ 227             MOVE P-SUBDIR2  TO  R-SUBDIR2.
+ 228             MOVE P-BARRA2   TO  R-BARRA2.
+
+ XBURP01.COB                             Fri Jul 17 07:34:49 1998    Page   5
+ line number source line   Microsoft COBOL                       Version 2.10
+
+ 229             MOVE P-ARQSAI   TO  R-ARQSAI.
+ 230             MOVE P-SUBDIR3  TO  R-SUBDIR3.
+ 231             MOVE P-BARRA3   TO  R-BARRA3.
+ 232             MOVE P-ARQCOR   TO  R-ARQCOR.
+ 233             WRITE REG-RESUMO  FROM W-RESUMO.
+ 234    
+ 235             PERFORM LERPARM   THRU      SAI-LERPARM.
+ 236    
+ 237             MOVE   0   TO    W-LIDOS
+ 238             MOVE   0   TO    W-LIDO1
+ 239             MOVE   0   TO    W-GRAVA.
+ 240             MOVE   0   TO    W-FIM.
+ 241    
+ 242         SAI-PROCESSA.
+ 243             EXIT.
+ 244    
+ 245    
+ 246         LER.
+ 247             READ    ENTRADA INTO W-ENTRADA AT END
+ 248                    MOVE 1 TO W-FIM
+ 249                    GO TO SAI-LER.
+ 250             IF E-CANAL =  "1"
+ 251                ADD     1  TO W-LIDOS.
+ 252             ADD        1  TO W-LIDO1.
+ 253             IF  E-CANAL =  "A"
+ 254             AND E-FONTE =  "1"
+ 255                 MOVE    E-GRUCOTA  TO  C-GRUCOTA
+ 256                 MOVE    E-GRUCOTA  TO  w-GRUCOTA
+ 257                 MOVE    SPACES     TO  C-FILLER
+ 258                 MOVE    W-LIDOS    TO  C-XEROX
+ 259                 WRITE   REG-CORRES FROM W-CORRES.
+ 260             IF  W-LIDOS =  1
+ 261             AND E-CANAL =  "A"
+ 262             AND E-FONTE =  "1"
+ 263                 MOVE    E-GRUCOTA  TO  R-GRUCOTAI.
+ 264             DISPLAY (21 70) W-LIDOS.
+ 265             DISPLAY (22 70) W-LIDO1.
+ 266         SAI-LER.
+ 267             EXIT.
+ 268    
+ 269         CONTAGRA.
+ 270             MOVE E-CANAL     TO WS-CANAL
+ 271             MOVE E-FONTE     TO WS-FONTE
+ 272             MOVE E-DADO      TO WS-DADOS
+ 273             MOVE W-LIDOS     TO WS-XEROX
+ 274             WRITE REG-SAIDA FROM W-SAIDA
+ 275             ADD   1         TO W-GRAVA
+ 276             PERFORM LER THRU SAI-LER.
+ 277         SAI-CONTAGRA.
+ 278             EXIT.
+ 279    
+ 280         GRA.
+ 281             WRITE REG-SAIDA.
+ 282         SAI-GRA.
+ 283             EXIT.
+ 284    
+
+
+ XBURP01.COB                             Fri Jul 17 07:34:49 1998    Page   6
+ line number source line   Microsoft COBOL                       Version 2.10
+
+   No errors or warnings
+
+   Data area size =  2138
+   Code area size =  1016
+

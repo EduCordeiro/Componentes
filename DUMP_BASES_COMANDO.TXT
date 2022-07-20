@@ -1,0 +1,23 @@
+/* BACKUP_BASE */
+-----------------
+mysqldump [--no-create-info] -h localhost -u root -p --database NOME_BASE  >NOME_BASE.sql
+
+
+S:\>mysqldump -h 192.168.1.4 -u root -p TEST CIF  > S:\ARQUIVOS_TEMPORARIOS\CIF_DESMEMBRADO_MOV20160804\TEST.CIF.sql
+
+
+
+
+
+
+/* RESTORE BASE */
+------------------
+
+LOGAR NO MYSQL
+--------------
+C:\Users\ecordeiro>mysql -h localhost -u root -p 
+Enter password: ******
+
+COMANDO SOURCE
+--------------
+mysql> source NOME_BASE.sql

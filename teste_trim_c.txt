@@ -1,0 +1,19 @@
+          //==============================
+          int iLenString = 0;
+          int iContChar  = 0;
+          char cChar;
+          iLenString     = strlen (nome_arquivo_saida);
+          
+          for (iContChar = iLenString -1; iContChar >= 0 ; iContChar--)
+          {
+              
+            cChar = nome_arquivo_saida[iContChar];
+              
+            if ( (cChar != 0x20) && (cChar != 0x0a) )
+        	{
+        	  nome_arquivo_saida[iContChar+1] = 0x0a;
+        	  goto FimReplace;
+        	}
+           } 
+           FimReplace:
+          //==============================
